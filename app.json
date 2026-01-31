@@ -2,36 +2,30 @@
   "expo": {
     "name": "Baby Note",
     "slug": "baby-note",
-    "version": "1.0.0",
+    "version": "0.0.1",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
     "scheme": "babynote",
     "newArchEnabled": true,
-    "splash": {
-      "image": "./assets/splash-icon.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#000000"
-    },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.babynote.app"
+      "bundleIdentifier": "com.emplica.babynote",
+      "appleTeamId": "NAN7MFNMT7"
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#000000"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.babynote.app"
+      "package": "com.emplica.babynote",
+      "permissions": ["android.permission.RECORD_AUDIO"]
     },
     "web": {
-      "favicon": "./assets/favicon.png",
+      "favicon": "./assets/icon.png",
       "bundler": "metro"
     },
-    "plugins": [
-      "expo-router",
-      "expo-image-picker"
-    ]
+    "plugins": ["expo-router", "expo-image-picker", "expo-splash-screen"]
   }
 }

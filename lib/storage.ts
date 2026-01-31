@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AppData, BabyEvent, BabyProfile, GrowthEntry, Language } from './types';
+import type { ColorSchemePreference } from './theme';
 
 const KEYS = {
   BABY: 'baby_profile',
@@ -7,6 +8,7 @@ const KEYS = {
   GROWTH: 'growth_entries',
   ONBOARDING: 'onboarding_completed',
   LANGUAGE: 'app_language',
+  COLOR_SCHEME: 'color_scheme_preference',
 };
 
 export async function saveBabyProfile(baby: BabyProfile): Promise<void> {
@@ -63,6 +65,16 @@ export async function setLanguage(lang: Language): Promise<void> {
 export async function getLanguage(): Promise<Language> {
   const data = await AsyncStorage.getItem(KEYS.LANGUAGE);
   return (data as Language) || 'fr';
+}
+
+export async function setColorSchemePreference(pref: ColorSchemePreference): Promise<void> {
+  await AsyncStorage.setItem(KEYS.COLOR_SCHEME, pref);
+}
+
+export async function getColorSchemePreference(): Promise<ColorSchemePreference> {
+  const data = await AsyncStorage.getItem(KEYS.COLOR_SCHEME);
+  if (data === 'dark' || data === 'light' || data === 'system') return data;
+  return 'system';
 }
 
 export async function exportAllData(): Promise<AppData> {

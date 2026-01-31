@@ -14,7 +14,15 @@ export interface BabyProfile {
   createdAt: string;
 }
 
-export type EventType = 'sleep' | 'breastfeeding' | 'bottle' | 'diaper' | 'solids' | 'pumped_milk';
+export type EventType =
+  | 'sleep' | 'breastfeeding' | 'bottle' | 'diaper' | 'solids' | 'pumped_milk'
+  | 'walk' | 'bath'
+  | 'doctor' | 'vaccine' | 'temperature' | 'illness' | 'treatment'
+  | 'mood'
+  | 'milestone';
+
+export type MoodType = 'happy' | 'good' | 'sad' | 'crying';
+export type MilestoneType = 'first_steps' | 'sat_up' | 'first_word' | 'first_tooth' | 'custom';
 
 export interface SleepEvent {
   id: string;
@@ -72,13 +80,104 @@ export interface PumpedMilkEvent {
   createdAt: string;
 }
 
+export interface WalkEvent {
+  id: string;
+  type: 'walk';
+  durationMinutes?: number;
+  startTime: string;
+  notes?: string;
+  createdAt: string;
+}
+
+export interface BathEvent {
+  id: string;
+  type: 'bath';
+  durationMinutes?: number;
+  startTime: string;
+  notes?: string;
+  createdAt: string;
+}
+
+export interface DoctorEvent {
+  id: string;
+  type: 'doctor';
+  startTime: string;
+  notes?: string;
+  createdAt: string;
+}
+
+export interface VaccineEvent {
+  id: string;
+  type: 'vaccine';
+  vaccineName?: string;
+  startTime: string;
+  notes?: string;
+  createdAt: string;
+}
+
+export interface TemperatureEvent {
+  id: string;
+  type: 'temperature';
+  temperature: number;
+  startTime: string;
+  notes?: string;
+  createdAt: string;
+}
+
+export interface IllnessEvent {
+  id: string;
+  type: 'illness';
+  description?: string;
+  startTime: string;
+  notes?: string;
+  createdAt: string;
+}
+
+export interface TreatmentEvent {
+  id: string;
+  type: 'treatment';
+  treatmentName?: string;
+  dosage?: string;
+  startTime: string;
+  notes?: string;
+  createdAt: string;
+}
+
+export interface MoodEvent {
+  id: string;
+  type: 'mood';
+  moodType: MoodType;
+  startTime: string;
+  notes?: string;
+  createdAt: string;
+}
+
+export interface MilestoneEvent {
+  id: string;
+  type: 'milestone';
+  milestoneType: MilestoneType;
+  description?: string;
+  startTime: string;
+  notes?: string;
+  createdAt: string;
+}
+
 export type BabyEvent =
   | SleepEvent
   | BreastfeedingEvent
   | BottleEvent
   | DiaperEvent
   | SolidsEvent
-  | PumpedMilkEvent;
+  | PumpedMilkEvent
+  | WalkEvent
+  | BathEvent
+  | DoctorEvent
+  | VaccineEvent
+  | TemperatureEvent
+  | IllnessEvent
+  | TreatmentEvent
+  | MoodEvent
+  | MilestoneEvent;
 
 export interface GrowthEntry {
   id: string;

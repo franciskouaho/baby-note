@@ -1,7 +1,8 @@
 import React, { createContext, useCallback, useEffect, useState } from 'react';
+import { useColorScheme as useRNColorScheme } from 'react-native';
 import { BabyProfile, BabyEvent, GrowthEntry, ThemeColor, Language } from './types';
 import * as storage from './storage';
-import { getTheme } from './theme';
+import { getTheme, resolveColorScheme, type ColorSchemePreference, type ThemeColors } from './theme';
 import i18n from './i18n';
 
 interface AppContextType {
@@ -16,9 +17,12 @@ interface AppContextType {
   refreshGrowth: () => Promise<void>;
   onboardingDone: boolean;
   completeOnboarding: () => Promise<void>;
-  theme: ReturnType<typeof getTheme>;
+  theme: ThemeColors;
   themeColor: ThemeColor;
   setThemeColor: (color: ThemeColor) => Promise<void>;
+  colorScheme: 'dark' | 'light';
+  colorSchemePreference: ColorSchemePreference;
+  setColorSchemePreference: (pref: ColorSchemePreference) => Promise<void>;
   language: Language;
   setLanguage: (lang: Language) => Promise<void>;
   isLoading: boolean;
@@ -32,8 +36,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [growthEntries, setGrowthEntries] = useState<GrowthEntry[]>([]);
   const [onboardingDone, setOnboardingDone] = useState(false);
   const [themeColor, setThemeColorState] = useState<ThemeColor>('peach');
+  const [colorSchemePreference, setColorSchemePrefState] = useState<ColorSchemePreference>('system');
   const [language, setLanguageState] = useState<Language>('fr');
   const [isLoading, setIsLoading] = useState(true);
+
+  const systemScheme = useRNColorScheme();
+  const colorScheme = resolveColorScheme(colorSchemePreference, systemScheme);
 
   useEffect(() => {
     loadData();
@@ -41,12 +49,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   async function loadData() {
     try {
-      const [babyData, eventsData, growthData, onboarding, lang] = await Promise.all([
+      const [babyData, eventsData, growthData, onboarding, lang, schemePref] = await Promise.all([
         storage.getBabyProfile(),
         storage.getEvents(),
         storage.getGrowthEntries(),
         storage.isOnboardingCompleted(),
         storage.getLanguage(),
+        storage.getColorSchemePreference(),
       ]);
       if (babyData) {
         setBabyState(babyData);
@@ -56,6 +65,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setGrowthEntries(growthData);
       setOnboardingDone(onboarding);
       setLanguageState(lang);
+      setColorSchemePrefState(schemePref);
       i18n.changeLanguage(lang);
     } finally {
       setIsLoading(false);
@@ -108,13 +118,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   }, [baby]);
 
+  const setColorSchemePreference = useCallback(async (pref: ColorSchemePreference) => {
+    setColorSchemePrefState(pref);
+    await storage.setColorSchemePreference(pref);
+  }, []);
+
   const setLanguageFunc = useCallback(async (lang: Language) => {
     setLanguageState(lang);
     i18n.changeLanguage(lang);
     await storage.setLanguage(lang);
   }, []);
 
-  const theme = getTheme(themeColor);
+  const theme = getTheme(themeColor, colorScheme);
 
   return (
     <AppContext.Provider
@@ -133,6 +148,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         theme,
         themeColor,
         setThemeColor,
+        colorScheme,
+        colorSchemePreference,
+        setColorSchemePreference,
         language,
         setLanguage: setLanguageFunc,
         isLoading,

@@ -1,52 +1,30 @@
 import React from 'react';
-import { View, Text, ScrollView, Pressable, Image } from 'react-native';
+import { View, Text, ScrollView, Pressable, Image, Dimensions } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { router } from 'expo-router';
-import Animated, { FadeInDown } from 'react-native-reanimated';
-import Svg, { Path, Circle, Line, Rect, Ellipse, G } from 'react-native-svg';
+import Animated, { FadeInDown, FadeIn, FadeInRight } from 'react-native-reanimated';
+import Svg, { Path, Circle, Line, Rect, Ellipse, G, Defs, LinearGradient, Stop } from 'react-native-svg';
 import { AppContext } from '@/lib/context';
 import { getBabyAge, formatEventTime, getLastEventOfType } from '@/lib/helpers';
+
+const { width: SCREEN_W } = Dimensions.get('window');
 
 /* ------------------------------------------------------------------ */
 /*  SVG Icon Components                                                */
 /* ------------------------------------------------------------------ */
-
-function StatsNavIcon({ color, size = 22 }: { color: string; size?: number }) {
-  return (
-    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2}>
-      <Path d="M18 20V10" strokeLinecap="round" />
-      <Path d="M12 20V4" strokeLinecap="round" />
-      <Path d="M6 20v-6" strokeLinecap="round" />
-    </Svg>
-  );
-}
-
-function SettingsNavIcon({ color, size = 22 }: { color: string; size?: number }) {
-  return (
-    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2}>
-      <Circle cx="12" cy="12" r="3" />
-      <Path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" />
-    </Svg>
-  );
-}
 
 function BabyFaceIcon({ size = 80 }: { size?: number }) {
   return (
     <Svg width={size} height={size} viewBox="0 0 80 80">
       <Circle cx="40" cy="40" r="38" fill="#F4C9A8" />
       <Circle cx="40" cy="40" r="32" fill="#FDDCC5" />
-      {/* Eyes */}
       <Ellipse cx="30" cy="38" rx="3" ry="3.5" fill="#3A3A3C" />
       <Ellipse cx="50" cy="38" rx="3" ry="3.5" fill="#3A3A3C" />
-      {/* Eye highlights */}
       <Circle cx="31" cy="37" r="1" fill="#FFFFFF" />
       <Circle cx="51" cy="37" r="1" fill="#FFFFFF" />
-      {/* Cheeks */}
       <Ellipse cx="24" cy="44" rx="5" ry="3" fill="#F8B4B4" opacity={0.4} />
       <Ellipse cx="56" cy="44" rx="5" ry="3" fill="#F8B4B4" opacity={0.4} />
-      {/* Mouth */}
       <Path d="M35 48 Q40 53 45 48" stroke="#E88B7A" strokeWidth={2} fill="none" strokeLinecap="round" />
-      {/* Hair tufts */}
       <Path d="M30 12 Q32 6 36 10" stroke="#C9A06C" strokeWidth={2} fill="none" strokeLinecap="round" />
       <Path d="M38 10 Q40 4 44 8" stroke="#C9A06C" strokeWidth={2} fill="none" strokeLinecap="round" />
       <Path d="M46 11 Q48 5 52 10" stroke="#C9A06C" strokeWidth={2} fill="none" strokeLinecap="round" />
@@ -54,60 +32,62 @@ function BabyFaceIcon({ size = 80 }: { size?: number }) {
   );
 }
 
-function SleepIcon({ size = 28 }: { size?: number }) {
+function SleepIcon({ color = '#A599FF', size = 24 }: { color?: string; size?: number }) {
   return (
-    <Svg width={size} height={size} viewBox="0 0 28 28" fill="none">
-      {/* Crib base */}
-      <Rect x="4" y="8" width="20" height="14" rx="3" stroke="#8B7BF4" strokeWidth={2} fill="none" />
-      {/* Crib legs */}
-      <Line x1="7" y1="22" x2="7" y2="26" stroke="#8B7BF4" strokeWidth={2} strokeLinecap="round" />
-      <Line x1="21" y1="22" x2="21" y2="26" stroke="#8B7BF4" strokeWidth={2} strokeLinecap="round" />
-      {/* Crib bars */}
-      <Line x1="10" y1="8" x2="10" y2="22" stroke="#8B7BF4" strokeWidth={1.5} opacity={0.5} />
-      <Line x1="14" y1="8" x2="14" y2="22" stroke="#8B7BF4" strokeWidth={1.5} opacity={0.5} />
-      <Line x1="18" y1="8" x2="18" y2="22" stroke="#8B7BF4" strokeWidth={1.5} opacity={0.5} />
-      {/* Moon */}
-      <Path d="M20 3 Q22 5 20 7 Q23 6 22 3Z" fill="#8B7BF4" opacity={0.7} />
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Path d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z" stroke={color} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" />
     </Svg>
   );
 }
 
-function BreastfeedingIcon({ size = 28 }: { size?: number }) {
+function BreastfeedingIcon({ color = '#6BD68A', size = 24 }: { color?: string; size?: number }) {
   return (
-    <Svg width={size} height={size} viewBox="0 0 28 28" fill="none">
-      {/* Mother circle */}
-      <Circle cx="11" cy="8" r="4" stroke="#4ECB71" strokeWidth={2} fill="none" />
-      {/* Mother body */}
-      <Path d="M7 14 Q7 20 11 22 Q15 20 15 14" stroke="#4ECB71" strokeWidth={2} fill="none" strokeLinecap="round" />
-      {/* Baby circle */}
-      <Circle cx="20" cy="14" r="3" stroke="#4ECB71" strokeWidth={1.5} fill="none" />
-      {/* Baby body */}
-      <Path d="M17 18 Q17 22 20 23 Q23 22 23 18" stroke="#4ECB71" strokeWidth={1.5} fill="none" strokeLinecap="round" />
-      {/* Heart */}
-      <Path d="M14 10 Q14 8 16 9 Q14 11 14 10 Q14 8 12 9 Q14 11 14 10Z" fill="#4ECB71" opacity={0.6} />
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Circle cx="10" cy="7" r="3.5" stroke={color} strokeWidth={1.8} />
+      <Path d="M6 12 Q6 17 10 18.5 Q14 17 14 12" stroke={color} strokeWidth={1.8} strokeLinecap="round" />
+      <Circle cx="18" cy="11" r="2.5" stroke={color} strokeWidth={1.5} />
+      <Path d="M15.5 14.5 Q15.5 18 18 19 Q20.5 18 20.5 14.5" stroke={color} strokeWidth={1.5} strokeLinecap="round" />
     </Svg>
   );
 }
 
-function DiaperIcon({ size = 28 }: { size?: number }) {
+function DiaperIcon({ color = '#FFD166', size = 24 }: { color?: string; size?: number }) {
   return (
-    <Svg width={size} height={size} viewBox="0 0 28 28" fill="none">
-      {/* Diaper shape */}
-      <Path
-        d="M6 8 L22 8 L24 14 Q24 22 14 24 Q4 22 4 14 Z"
-        stroke="#F4C542"
-        strokeWidth={2}
-        fill="none"
-        strokeLinejoin="round"
-      />
-      {/* Tab left */}
-      <Path d="M6 8 L4 12" stroke="#F4C542" strokeWidth={2} strokeLinecap="round" />
-      {/* Tab right */}
-      <Path d="M22 8 L24 12" stroke="#F4C542" strokeWidth={2} strokeLinecap="round" />
-      {/* Star decoration */}
-      <Path d="M14 14 L15 16 L14 15 L13 16 Z" fill="#F4C542" opacity={0.6} />
-      <Circle cx="11" cy="15" r="1" fill="#F4C542" opacity={0.4} />
-      <Circle cx="17" cy="15" r="1" fill="#F4C542" opacity={0.4} />
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Path d="M5 7 L19 7 L21 12 Q21 19 12 21 Q3 19 3 12 Z" stroke={color} strokeWidth={1.8} strokeLinejoin="round" />
+      <Path d="M5 7 L3 10" stroke={color} strokeWidth={1.8} strokeLinecap="round" />
+      <Path d="M19 7 L21 10" stroke={color} strokeWidth={1.8} strokeLinecap="round" />
+    </Svg>
+  );
+}
+
+function BottleIcon({ color = '#7EC8F2', size = 24 }: { color?: string; size?: number }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Rect x="8" y="3" width="8" height="3" rx="1" stroke={color} strokeWidth={1.8} />
+      <Path d="M7 6 L7 19 Q7 21 9 21 L15 21 Q17 21 17 19 L17 6" stroke={color} strokeWidth={1.8} />
+      <Line x1="7" y1="12" x2="17" y2="12" stroke={color} strokeWidth={1.2} opacity={0.5} />
+    </Svg>
+  );
+}
+
+function SolidsIcon({ color = '#FFB088', size = 24 }: { color?: string; size?: number }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Ellipse cx="12" cy="16" rx="8" ry="4" stroke={color} strokeWidth={1.8} />
+      <Path d="M4 16 Q4 12 12 12 Q20 12 20 16" stroke={color} strokeWidth={1.8} />
+      <Line x1="12" y1="4" x2="12" y2="10" stroke={color} strokeWidth={1.8} strokeLinecap="round" />
+      <Circle cx="12" cy="10" r="2" stroke={color} strokeWidth={1.5} />
+    </Svg>
+  );
+}
+
+function PumpedIcon({ color = '#C9A0E0', size = 24 }: { color?: string; size?: number }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Rect x="8" y="8" width="8" height="13" rx="2" stroke={color} strokeWidth={1.8} />
+      <Path d="M8 12 L6 10 L6 6 L10 6 L10 8" stroke={color} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" />
+      <Line x1="8" y1="14" x2="16" y2="14" stroke={color} strokeWidth={1.2} opacity={0.5} />
     </Svg>
   );
 }
@@ -121,92 +101,34 @@ function PlusIcon({ color, size = 18 }: { color: string; size?: number }) {
   );
 }
 
-/* ------------------------------------------------------------------ */
-/*  Tracking Card Component                                            */
-/* ------------------------------------------------------------------ */
-
-function TrackingCard({
-  title,
-  icon,
-  accentColor,
-  cardBg,
-  lastTime,
-  notYetText,
-  onAdd,
-  index,
-}: {
-  title: string;
-  icon: React.ReactNode;
-  accentColor: string;
-  cardBg: string;
-  lastTime: string | null;
-  notYetText: string;
-  onAdd: () => void;
-  index: number;
-}) {
+function GrowthIcon({ color, size = 16 }: { color: string; size?: number }) {
   return (
-    <Animated.View
-      entering={FadeInDown.delay(200 + index * 100).duration(500).springify()}
-      style={{
-        flex: 1,
-        backgroundColor: cardBg,
-        borderRadius: 20,
-        padding: 14,
-        alignItems: 'center',
-        minHeight: 150,
-        justifyContent: 'space-between',
-      }}
-    >
-      <View style={{ alignItems: 'center', gap: 8 }}>
-        <View
-          style={{
-            width: 48,
-            height: 48,
-            borderRadius: 14,
-            backgroundColor: accentColor + '20',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          {icon}
-        </View>
-        <Text
-          style={{
-            color: '#FFFFFF',
-            fontSize: 13,
-            fontWeight: '600',
-            textAlign: 'center',
-          }}
-        >
-          {title}
-        </Text>
-        <Text
-          style={{
-            color: '#8E8E93',
-            fontSize: 11,
-            textAlign: 'center',
-          }}
-        >
-          {lastTime ? formatEventTime(lastTime) : notYetText}
-        </Text>
-      </View>
-      <Pressable
-        onPress={onAdd}
-        style={({ pressed }) => ({
-          width: 36,
-          height: 36,
-          borderRadius: 18,
-          backgroundColor: pressed ? accentColor + 'CC' : accentColor,
-          alignItems: 'center',
-          justifyContent: 'center',
-          marginTop: 8,
-        })}
-      >
-        <PlusIcon color="#000000" size={16} />
-      </Pressable>
-    </Animated.View>
+    <Svg width={size} height={size} viewBox="0 0 16 16" fill="none">
+      <Path d="M2 14 L6 8 L10 10 L14 2" stroke={color} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" />
+    </Svg>
   );
 }
+
+function ArrowRightIcon({ color, size = 14 }: { color: string; size?: number }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 14 14" fill="none">
+      <Path d="M5 3l4 4-4 4" stroke={color} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" />
+    </Svg>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/*  Quick action data                                                  */
+/* ------------------------------------------------------------------ */
+
+const QUICK_ACTIONS = [
+  { type: 'sleep', icon: SleepIcon, color: '#A599FF', cardKey: 'cardSleep' as const },
+  { type: 'breastfeeding', icon: BreastfeedingIcon, color: '#6BD68A', cardKey: 'cardFeeding' as const },
+  { type: 'diaper', icon: DiaperIcon, color: '#FFD166', cardKey: 'cardDiaper' as const },
+  { type: 'bottle', icon: BottleIcon, color: '#7EC8F2', cardKey: 'cardBottle' as const },
+  { type: 'solids', icon: SolidsIcon, color: '#FFB088', cardKey: 'cardSolids' as const },
+  { type: 'pumped_milk', icon: PumpedIcon, color: '#C9A0E0', cardKey: 'cardPumped' as const },
+];
 
 /* ------------------------------------------------------------------ */
 /*  Dashboard Screen                                                   */
@@ -214,230 +136,424 @@ function TrackingCard({
 
 export default function DashboardScreen() {
   const { t } = useTranslation();
-  const { baby, events, theme } = React.use(AppContext);
+  const { baby, events, theme, colorScheme } = React.use(AppContext);
 
   const babyAge = baby ? getBabyAge(baby.birthday) : '';
   const lastSleep = getLastEventOfType(events, 'sleep');
-  const lastBreastfeeding = getLastEventOfType(events, 'breastfeeding');
+  const lastFeeding = getLastEventOfType(events, 'breastfeeding');
   const lastDiaper = getLastEventOfType(events, 'diaper');
+
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? t('home.hello', 'Bonjour') : hour < 18 ? t('home.hello', 'Bonjour') : t('home.goodEvening', 'Bonsoir');
 
   function handleAddEvent(type: string) {
     router.push(`/modals/add-event?type=${type}`);
   }
 
+  const eventColors: Record<string, string> = {
+    sleep: '#A599FF',
+    breastfeeding: '#6BD68A',
+    bottle: '#7EC8F2',
+    solids: '#FFB088',
+    pumped_milk: '#C9A0E0',
+    diaper: '#FFD166',
+  };
+
   return (
-    <View style={{ flex: 1, backgroundColor: '#000000' }}>
+    <View style={{ flex: 1, backgroundColor: theme.background }}>
       <ScrollView
-        contentContainerStyle={{ paddingBottom: 120 }}
+        contentContainerStyle={{ paddingBottom: 120, paddingTop: 60 }}
         showsVerticalScrollIndicator={false}
       >
-        {/* ---- Header row: Stats / Avatar / Settings ---- */}
+        {/* ---- Hero Header ---- */}
         <Animated.View
-          entering={FadeInDown.duration(500)}
+          entering={FadeIn.duration(500)}
           style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'space-between',
             paddingHorizontal: 24,
-            paddingTop: 60,
-            paddingBottom: 8,
+            marginBottom: 28,
           }}
         >
-          <Pressable
-            onPress={() => router.navigate('/(tabs)/stats')}
-            style={({ pressed }) => ({
-              width: 40,
-              height: 40,
-              borderRadius: 20,
-              backgroundColor: pressed ? '#2C2C2E' : '#1C1C1E',
-              alignItems: 'center',
-              justifyContent: 'center',
-            })}
-          >
-            <StatsNavIcon color="#8E8E93" />
-          </Pressable>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <View style={{ flex: 1, marginRight: 16 }}>
+              <Text
+                style={{
+                  fontSize: 15,
+                  fontWeight: '500',
+                  color: theme.textSecondary,
+                  marginBottom: 4,
+                }}
+              >
+                {greeting} {'\u2728'}
+              </Text>
+              <Text
+                style={{
+                  fontSize: 32,
+                  fontWeight: '800',
+                  color: theme.text,
+                  lineHeight: 38,
+                  letterSpacing: -0.5,
+                }}
+              >
+                {baby?.name ?? 'Baby Note'}
+              </Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 8, gap: 8 }}>
+                <View
+                  style={{
+                    backgroundColor: theme.primary + '18',
+                    paddingHorizontal: 10,
+                    paddingVertical: 4,
+                    borderRadius: 10,
+                  }}
+                >
+                  <Text style={{ color: theme.primary, fontSize: 13, fontWeight: '600' }}>
+                    {babyAge}
+                  </Text>
+                </View>
+              </View>
+            </View>
 
-          <View style={{ alignItems: 'center' }}>
+            <Pressable
+              onPress={() => router.navigate('/(tabs)/settings')}
+              style={({ pressed }) => ({
+                opacity: pressed ? 0.85 : 1,
+                transform: [{ scale: pressed ? 0.95 : 1 }],
+              })}
+            >
+              <View
+                style={{
+                  width: 56,
+                  height: 56,
+                  borderRadius: 20,
+                  overflow: 'hidden',
+                  backgroundColor: theme.surfaceElevated,
+                  borderWidth: 2.5,
+                  borderColor: theme.primary + '30',
+                  shadowColor: theme.primary,
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.15,
+                  shadowRadius: 12,
+                  elevation: 4,
+                }}
+              >
+                {baby?.photoUri ? (
+                  <Image source={{ uri: baby.photoUri }} style={{ width: '100%', height: '100%' }} />
+                ) : (
+                  <View style={{ transform: [{ scale: 0.6 }], alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%' }}>
+                    <BabyFaceIcon size={80} />
+                  </View>
+                )}
+              </View>
+            </Pressable>
+          </View>
+        </Animated.View>
+
+        {/* ---- Vital Stats Strip ---- */}
+        <Animated.View entering={FadeInDown.delay(80).duration(500)}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{ paddingHorizontal: 24, gap: 10 }}
+            style={{ marginBottom: 28 }}
+          >
+            {/* Last Sleep */}
+            {lastSleep && (
+              <View
+                style={{
+                  backgroundColor: theme.cardSleep,
+                  borderRadius: 16,
+                  paddingHorizontal: 14,
+                  paddingVertical: 10,
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: 8,
+                }}
+              >
+                <SleepIcon color="#A599FF" size={16} />
+                <Text style={{ color: theme.textSecondary, fontSize: 12, fontWeight: '500' }}>
+                  {formatEventTime(lastSleep)}
+                </Text>
+              </View>
+            )}
+
+            {/* Last Feeding */}
+            {lastFeeding && (
+              <View
+                style={{
+                  backgroundColor: theme.cardFeeding,
+                  borderRadius: 16,
+                  paddingHorizontal: 14,
+                  paddingVertical: 10,
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: 8,
+                }}
+              >
+                <BreastfeedingIcon color="#6BD68A" size={16} />
+                <Text style={{ color: theme.textSecondary, fontSize: 12, fontWeight: '500' }}>
+                  {formatEventTime(lastFeeding)}
+                </Text>
+              </View>
+            )}
+
+            {/* Last Diaper */}
+            {lastDiaper && (
+              <View
+                style={{
+                  backgroundColor: theme.cardDiaper,
+                  borderRadius: 16,
+                  paddingHorizontal: 14,
+                  paddingVertical: 10,
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: 8,
+                }}
+              >
+                <DiaperIcon color="#FFD166" size={16} />
+                <Text style={{ color: theme.textSecondary, fontSize: 12, fontWeight: '500' }}>
+                  {formatEventTime(lastDiaper)}
+                </Text>
+              </View>
+            )}
+
+            {/* Height */}
             <View
               style={{
-                width: 88,
-                height: 88,
-                borderRadius: 44,
-                borderWidth: 3,
-                borderColor: theme.primary,
+                backgroundColor: theme.surface,
+                borderRadius: 16,
+                paddingHorizontal: 14,
+                paddingVertical: 10,
+                flexDirection: 'row',
                 alignItems: 'center',
-                justifyContent: 'center',
-                overflow: 'hidden',
+                gap: 6,
+                borderWidth: 1,
+                borderColor: theme.border,
               }}
             >
-              {baby?.photoUri ? (
-                <Image
-                  source={{ uri: baby.photoUri }}
-                  style={{ width: 82, height: 82, borderRadius: 41 }}
-                />
-              ) : (
-                <BabyFaceIcon size={80} />
-              )}
+              <Text style={{ fontSize: 12 }}>{'\u{1F4CF}'}</Text>
+              <Text style={{ color: theme.text, fontSize: 13, fontWeight: '700' }}>
+                {baby?.height ? `${baby.height}` : '--'}
+              </Text>
+              <Text style={{ color: theme.textTertiary, fontSize: 11 }}>cm</Text>
             </View>
+
+            {/* Weight */}
+            <View
+              style={{
+                backgroundColor: theme.surface,
+                borderRadius: 16,
+                paddingHorizontal: 14,
+                paddingVertical: 10,
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 6,
+                borderWidth: 1,
+                borderColor: theme.border,
+              }}
+            >
+              <Text style={{ fontSize: 12 }}>{'\u2696\uFE0F'}</Text>
+              <Text style={{ color: theme.text, fontSize: 13, fontWeight: '700' }}>
+                {baby?.weight ? `${baby.weight}` : '--'}
+              </Text>
+              <Text style={{ color: theme.textTertiary, fontSize: 11 }}>kg</Text>
+            </View>
+          </ScrollView>
+        </Animated.View>
+
+        {/* ---- Quick Actions Grid ---- */}
+        <Animated.View entering={FadeInDown.delay(160).duration(500)}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 24, marginBottom: 14 }}>
+            <Text style={{ fontSize: 13, color: theme.textTertiary, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 1 }}>
+              {t('dashboard.actions', 'Actions rapides')}
+            </Text>
           </View>
 
+          <View
+            style={{
+              flexDirection: 'row',
+              flexWrap: 'wrap',
+              paddingHorizontal: 20,
+              gap: 10,
+            }}
+          >
+            {QUICK_ACTIONS.map((action, i) => {
+              const Icon = action.icon;
+              const tKey = action.type === 'pumped_milk' ? 'tracking.pumpedMilk' : `tracking.${action.type}`;
+              return (
+                <Animated.View
+                  key={action.type}
+                  entering={FadeInDown.delay(200 + i * 50).duration(400)}
+                  style={{ width: (SCREEN_W - 60) / 3 }}
+                >
+                  <Pressable
+                    onPress={() => handleAddEvent(action.type)}
+                    style={({ pressed }) => ({
+                      backgroundColor: pressed
+                        ? (colorScheme === 'dark' ? action.color + '20' : action.color + '18')
+                        : (colorScheme === 'dark' ? theme[action.cardKey] : theme.surface),
+                      borderRadius: 22,
+                      paddingVertical: 18,
+                      alignItems: 'center',
+                      gap: 10,
+                      borderWidth: colorScheme === 'light' ? 1 : 0,
+                      borderColor: colorScheme === 'light' ? theme.border : 'transparent',
+                      shadowColor: colorScheme === 'light' ? action.color : 'transparent',
+                      shadowOffset: { width: 0, height: 4 },
+                      shadowOpacity: colorScheme === 'light' ? 0.08 : 0,
+                      shadowRadius: 12,
+                      elevation: colorScheme === 'light' ? 2 : 0,
+                      transform: [{ scale: pressed ? 0.96 : 1 }],
+                    })}
+                  >
+                    <View
+                      style={{
+                        width: 44,
+                        height: 44,
+                        borderRadius: 15,
+                        backgroundColor: action.color + '18',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <Icon color={action.color} size={22} />
+                    </View>
+                    <Text
+                      style={{
+                        color: theme.text,
+                        fontSize: 11,
+                        fontWeight: '600',
+                        textAlign: 'center',
+                        letterSpacing: 0.1,
+                      }}
+                      numberOfLines={1}
+                    >
+                      {t(tKey)}
+                    </Text>
+                  </Pressable>
+                </Animated.View>
+              );
+            })}
+          </View>
+        </Animated.View>
+
+        {/* ---- Growth Entry CTA ---- */}
+        <Animated.View entering={FadeInDown.delay(500).duration(500)} style={{ paddingHorizontal: 24, marginTop: 24 }}>
           <Pressable
-            onPress={() => router.navigate('/(tabs)/settings')}
+            onPress={() => router.push('/modals/add-growth')}
             style={({ pressed }) => ({
-              width: 40,
-              height: 40,
+              backgroundColor: pressed ? theme.primary + '15' : theme.primary + '0A',
               borderRadius: 20,
-              backgroundColor: pressed ? '#2C2C2E' : '#1C1C1E',
+              padding: 16,
+              flexDirection: 'row',
               alignItems: 'center',
-              justifyContent: 'center',
+              gap: 14,
+              borderWidth: 1.5,
+              borderColor: theme.primary + '25',
+              borderStyle: 'dashed',
+              transform: [{ scale: pressed ? 0.98 : 1 }],
             })}
           >
-            <SettingsNavIcon color="#8E8E93" />
+            <View
+              style={{
+                width: 40,
+                height: 40,
+                borderRadius: 14,
+                backgroundColor: theme.primary + '18',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <GrowthIcon color={theme.primary} size={18} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={{ color: theme.text, fontSize: 14, fontWeight: '600' }}>
+                {t('growth.title', 'Croissance')}
+              </Text>
+              <Text style={{ color: theme.textSecondary, fontSize: 12, marginTop: 2 }}>
+                {t('dashboard.trackGrowth', 'Suivre poids, taille, PC')}
+              </Text>
+            </View>
+            <ArrowRightIcon color={theme.primary} size={16} />
           </Pressable>
         </Animated.View>
 
-        {/* ---- Baby name & age ---- */}
-        <Animated.View
-          entering={FadeInDown.delay(100).duration(500)}
-          style={{ alignItems: 'center', marginTop: 12 }}
-        >
-          <Text
-            style={{
-              color: '#FFFFFF',
-              fontSize: 22,
-              fontWeight: '700',
-              letterSpacing: 0.3,
-            }}
-          >
-            {baby?.name ?? '---'}
-          </Text>
-          <Text
-            style={{
-              color: '#8E8E93',
-              fontSize: 14,
-              marginTop: 4,
-            }}
-          >
-            {babyAge}
-          </Text>
-        </Animated.View>
+        {/* ---- Recent Activity ---- */}
+        {events.length > 0 && (
+          <Animated.View entering={FadeInDown.delay(580).duration(500)} style={{ marginTop: 28 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 24, marginBottom: 14 }}>
+              <Text style={{ fontSize: 13, color: theme.textTertiary, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 1 }}>
+                {t('home.recentActivity', 'Activite recente')}
+              </Text>
+              <Pressable onPress={() => router.navigate('/(tabs)/journal')} hitSlop={8}>
+                <Text style={{ color: theme.primary, fontSize: 12, fontWeight: '600' }}>
+                  {t('common.seeAll', 'Voir tout')}
+                </Text>
+              </Pressable>
+            </View>
 
-        {/* ---- Height / Weight row ---- */}
-        <Animated.View
-          entering={FadeInDown.delay(150).duration(500)}
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'center',
-            gap: 40,
-            marginTop: 16,
-            marginBottom: 24,
-          }}
-        >
-          <View style={{ alignItems: 'center' }}>
-            <Text style={{ color: '#636366', fontSize: 12 }}>
-              {t('dashboard.height')}
-            </Text>
-            <Text style={{ color: '#FFFFFF', fontSize: 16, fontWeight: '600', marginTop: 2 }}>
-              {baby?.height ? `${baby.height} cm` : '--'}
-            </Text>
-          </View>
-          <View
-            style={{
-              width: 1,
-              height: 30,
-              backgroundColor: '#2C2C2E',
-            }}
-          />
-          <View style={{ alignItems: 'center' }}>
-            <Text style={{ color: '#636366', fontSize: 12 }}>
-              {t('dashboard.weight')}
-            </Text>
-            <Text style={{ color: '#FFFFFF', fontSize: 16, fontWeight: '600', marginTop: 2 }}>
-              {baby?.weight ? `${baby.weight} kg` : '--'}
-            </Text>
-          </View>
-        </Animated.View>
-
-        {/* ---- Tracking Cards ---- */}
-        <View
-          style={{
-            flexDirection: 'row',
-            paddingHorizontal: 16,
-            gap: 10,
-          }}
-        >
-          <TrackingCard
-            title={t('tracking.sleep')}
-            icon={<SleepIcon />}
-            accentColor="#8B7BF4"
-            cardBg="#1C1C2E"
-            lastTime={lastSleep}
-            notYetText={t('dashboard.notYet')}
-            onAdd={() => handleAddEvent('sleep')}
-            index={0}
-          />
-          <TrackingCard
-            title={t('tracking.breastfeeding')}
-            icon={<BreastfeedingIcon />}
-            accentColor="#4ECB71"
-            cardBg="#1C2E1C"
-            lastTime={lastBreastfeeding}
-            notYetText={t('dashboard.notYet')}
-            onAdd={() => handleAddEvent('breastfeeding')}
-            index={1}
-          />
-          <TrackingCard
-            title={t('tracking.diaper')}
-            icon={<DiaperIcon />}
-            accentColor="#F4C542"
-            cardBg="#2E2E1C"
-            lastTime={lastDiaper}
-            notYetText={t('dashboard.notYet')}
-            onAdd={() => handleAddEvent('diaper')}
-            index={2}
-          />
-        </View>
-
-        {/* ---- Helper text ---- */}
-        <Animated.View
-          entering={FadeInDown.delay(500).duration(500)}
-          style={{ alignItems: 'center', marginTop: 32, paddingHorizontal: 40 }}
-        >
-          <Text
-            style={{
-              color: '#636366',
-              fontSize: 13,
-              textAlign: 'center',
-              lineHeight: 18,
-            }}
-          >
-            {t('dashboard.addEvent')}
-          </Text>
-        </Animated.View>
+            <View style={{ paddingHorizontal: 24, gap: 8 }}>
+              {events.slice(0, 3).map((event, idx) => {
+                const color = eventColors[event.type] || theme.textSecondary;
+                return (
+                  <Animated.View key={event.id} entering={FadeInRight.delay(600 + idx * 60).duration(400)}>
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        backgroundColor: theme.surface,
+                        paddingVertical: 12,
+                        paddingHorizontal: 14,
+                        borderRadius: 16,
+                        gap: 12,
+                        borderWidth: colorScheme === 'light' ? 1 : 0,
+                        borderColor: theme.border,
+                      }}
+                    >
+                      <View
+                        style={{
+                          width: 6,
+                          height: 6,
+                          borderRadius: 3,
+                          backgroundColor: color,
+                        }}
+                      />
+                      <Text style={{ flex: 1, color: theme.text, fontSize: 14, fontWeight: '500' }}>
+                        {t(`tracking.${event.type === 'pumped_milk' ? 'pumpedMilk' : event.type}`)}
+                      </Text>
+                      <Text style={{ color: theme.textTertiary, fontSize: 12, fontWeight: '500' }}>
+                        {formatEventTime(event.startTime)}
+                      </Text>
+                    </View>
+                  </Animated.View>
+                );
+              })}
+            </View>
+          </Animated.View>
+        )}
       </ScrollView>
 
-      {/* ---- Floating Action Button ---- */}
-      <Pressable
-        onPress={() => handleAddEvent('sleep')}
-        style={({ pressed }) => ({
-          position: 'absolute',
-          bottom: 100,
-          right: 24,
-          width: 60,
-          height: 60,
-          borderRadius: 30,
-          backgroundColor: pressed ? '#3A3A3C' : '#2C2C2E',
-          alignItems: 'center',
-          justifyContent: 'center',
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: 0.3,
-          shadowRadius: 8,
-          elevation: 8,
-        })}
-      >
-        <PlusIcon color={theme.primary} size={26} />
-      </Pressable>
+      {/* ---- Floating Add Button ---- */}
+      <Animated.View entering={FadeInDown.delay(700).duration(500)} style={{ position: 'absolute', bottom: 100, right: 24 }}>
+        <Pressable
+          onPress={() => router.push('/modals/add')}
+          style={({ pressed }) => ({
+            width: 58,
+            height: 58,
+            borderRadius: 22,
+            backgroundColor: pressed ? theme.primary : theme.primary,
+            alignItems: 'center',
+            justifyContent: 'center',
+            shadowColor: theme.primary,
+            shadowOffset: { width: 0, height: 6 },
+            shadowOpacity: 0.35,
+            shadowRadius: 14,
+            elevation: 8,
+            transform: [{ scale: pressed ? 0.92 : 1 }],
+            opacity: pressed ? 0.9 : 1,
+          })}
+        >
+          <PlusIcon color={theme.activeButtonText} size={22} />
+        </Pressable>
+      </Animated.View>
     </View>
   );
 }

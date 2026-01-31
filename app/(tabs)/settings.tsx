@@ -1,29 +1,30 @@
 import React, { useCallback } from 'react';
-import { View, Text, ScrollView, Pressable, Alert } from 'react-native';
+import { View, Text, ScrollView, Pressable, Alert, Image } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { router } from 'expo-router';
-import Animated, { FadeInDown } from 'react-native-reanimated';
-import Svg, { Path, Circle, Line, Rect } from 'react-native-svg';
+import Animated, { FadeInDown, FadeIn } from 'react-native-reanimated';
+import Svg, { Path, Circle, Line, Rect, Ellipse } from 'react-native-svg';
 import { File, Paths } from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import Constants from 'expo-constants';
 import { AppContext } from '@/lib/context';
 import * as storage from '@/lib/storage';
 import type { ThemeColor, Language } from '@/lib/types';
+import type { ColorSchemePreference } from '@/lib/theme';
 
 /* ------------------------------------------------------------------ */
 /*  Icon components                                                    */
 /* ------------------------------------------------------------------ */
 
-function ChevronRightIcon({ color = '#636366', size = 18 }: { color?: string; size?: number }) {
+function ChevronRightIcon({ color = '#636366', size = 16 }: { color?: string; size?: number }) {
   return (
-    <Svg width={size} height={size} viewBox="0 0 18 18" fill="none">
-      <Path d="M7 4l5 5-5 5" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+    <Svg width={size} height={size} viewBox="0 0 16 16" fill="none">
+      <Path d="M6 3l5 5-5 5" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
     </Svg>
   );
 }
 
-function ProfileIcon({ color, size = 22 }: { color: string; size?: number }) {
+function ProfileIcon({ color, size = 20 }: { color: string; size?: number }) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2}>
       <Circle cx="12" cy="8" r="4" />
@@ -32,7 +33,7 @@ function ProfileIcon({ color, size = 22 }: { color: string; size?: number }) {
   );
 }
 
-function LanguageIcon({ color, size = 22 }: { color: string; size?: number }) {
+function LanguageIcon({ color, size = 20 }: { color: string; size?: number }) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2}>
       <Circle cx="12" cy="12" r="10" />
@@ -42,7 +43,7 @@ function LanguageIcon({ color, size = 22 }: { color: string; size?: number }) {
   );
 }
 
-function PaletteIcon({ color, size = 22 }: { color: string; size?: number }) {
+function PaletteIcon({ color, size = 20 }: { color: string; size?: number }) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2}>
       <Circle cx="12" cy="12" r="10" />
@@ -54,7 +55,16 @@ function PaletteIcon({ color, size = 22 }: { color: string; size?: number }) {
   );
 }
 
-function ExportIcon({ color, size = 22 }: { color: string; size?: number }) {
+function AppearanceIcon({ color, size = 20 }: { color: string; size?: number }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2}>
+      <Circle cx="12" cy="12" r="10" />
+      <Path d="M12 2a10 10 0 000 20V2z" fill={color} opacity={0.3} />
+    </Svg>
+  );
+}
+
+function ExportIcon({ color, size = 20 }: { color: string; size?: number }) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2}>
       <Path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
@@ -64,7 +74,7 @@ function ExportIcon({ color, size = 22 }: { color: string; size?: number }) {
   );
 }
 
-function ImportIcon({ color, size = 22 }: { color: string; size?: number }) {
+function ImportIcon({ color, size = 20 }: { color: string; size?: number }) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2}>
       <Path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
@@ -74,19 +84,17 @@ function ImportIcon({ color, size = 22 }: { color: string; size?: number }) {
   );
 }
 
-function TrashIcon({ color, size = 22 }: { color: string; size?: number }) {
+function TrashIcon({ color, size = 20 }: { color: string; size?: number }) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2}>
       <Path d="M3 6h18" strokeLinecap="round" />
       <Path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6" />
       <Path d="M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2" />
-      <Line x1="10" y1="11" x2="10" y2="17" strokeLinecap="round" />
-      <Line x1="14" y1="11" x2="14" y2="17" strokeLinecap="round" />
     </Svg>
   );
 }
 
-function InfoIcon({ color, size = 22 }: { color: string; size?: number }) {
+function InfoIcon({ color, size = 20 }: { color: string; size?: number }) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2}>
       <Circle cx="12" cy="12" r="10" />
@@ -96,65 +104,19 @@ function InfoIcon({ color, size = 22 }: { color: string; size?: number }) {
   );
 }
 
-/* ------------------------------------------------------------------ */
-/*  Setting row component                                              */
-/* ------------------------------------------------------------------ */
-
-function SettingRow({
-  icon,
-  label,
-  onPress,
-  rightContent,
-  destructive = false,
-  index,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  onPress?: () => void;
-  rightContent?: React.ReactNode;
-  destructive?: boolean;
-  index: number;
-}) {
+function BabyFaceIcon({ size = 48 }: { size?: number }) {
   return (
-    <Animated.View entering={FadeInDown.delay(index * 60).duration(400)}>
-      <Pressable
-        onPress={onPress}
-        disabled={!onPress && !rightContent}
-        style={({ pressed }) => ({
-          backgroundColor: pressed && onPress ? '#2C2C2E' : '#1C1C1E',
-          borderRadius: 16,
-          padding: 16,
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: 14,
-          marginBottom: 8,
-        })}
-      >
-        <View
-          style={{
-            width: 40,
-            height: 40,
-            borderRadius: 10,
-            backgroundColor: destructive ? '#FF3B3020' : '#2C2C2E',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          {icon}
-        </View>
-        <Text
-          style={{
-            flex: 1,
-            color: destructive ? '#FF3B30' : '#FFFFFF',
-            fontSize: 15,
-            fontWeight: '500',
-          }}
-        >
-          {label}
-        </Text>
-        {rightContent ?? (onPress ? <ChevronRightIcon /> : null)}
-      </Pressable>
-    </Animated.View>
+    <Svg width={size} height={size} viewBox="0 0 80 80">
+      <Circle cx="40" cy="40" r="38" fill="#F4C9A8" />
+      <Circle cx="40" cy="40" r="32" fill="#FDDCC5" />
+      <Ellipse cx="30" cy="38" rx="3" ry="3.5" fill="#3A3A3C" />
+      <Ellipse cx="50" cy="38" rx="3" ry="3.5" fill="#3A3A3C" />
+      <Circle cx="31" cy="37" r="1" fill="#FFFFFF" />
+      <Circle cx="51" cy="37" r="1" fill="#FFFFFF" />
+      <Ellipse cx="24" cy="44" rx="5" ry="3" fill="#F8B4B4" opacity={0.4} />
+      <Ellipse cx="56" cy="44" rx="5" ry="3" fill="#F8B4B4" opacity={0.4} />
+      <Path d="M35 48 Q40 53 45 48" stroke="#E88B7A" strokeWidth={2} fill="none" strokeLinecap="round" />
+    </Svg>
   );
 }
 
@@ -166,6 +128,9 @@ export default function SettingsScreen() {
   const { t } = useTranslation();
   const {
     theme,
+    colorScheme,
+    colorSchemePreference,
+    setColorSchemePreference,
     themeColor,
     setThemeColor,
     language,
@@ -177,8 +142,8 @@ export default function SettingsScreen() {
   } = React.use(AppContext);
 
   const appVersion = Constants.expoConfig?.version ?? '1.0.0';
+  const activeTextColor = theme.activeButtonText;
 
-  /* ---- Export ---- */
   const handleExport = useCallback(async () => {
     try {
       const data = await storage.exportAllData();
@@ -198,7 +163,6 @@ export default function SettingsScreen() {
     }
   }, [t]);
 
-  /* ---- Import ---- */
   const handleImport = useCallback(async () => {
     try {
       const backupFile = new File(Paths.document, 'baby-note-backup.json');
@@ -217,7 +181,6 @@ export default function SettingsScreen() {
     }
   }, [refreshEvents, refreshGrowth]);
 
-  /* ---- Delete All ---- */
   const handleDeleteAll = useCallback(() => {
     Alert.alert(t('settings.deleteAll'), t('settings.deleteConfirm'), [
       { text: t('common.cancel'), style: 'cancel' },
@@ -232,56 +195,144 @@ export default function SettingsScreen() {
     ]);
   }, [t]);
 
-  /* ---- Theme color options ---- */
-  const themeOptions: { color: ThemeColor; hex: string }[] = [
-    { color: 'peach', hex: '#F4A683' },
-    { color: 'pink', hex: '#E8A0BF' },
-    { color: 'blue', hex: '#7EB6DE' },
+  const themeOptions: { color: ThemeColor; hex: string; label: string }[] = [
+    { color: 'peach', hex: '#F4A683', label: 'Peach' },
+    { color: 'pink', hex: '#E8A0BF', label: 'Rose' },
+    { color: 'blue', hex: '#7EB6DE', label: 'Ciel' },
+  ];
+
+  const appearanceOptions: { pref: ColorSchemePreference; label: string }[] = [
+    { pref: 'system', label: 'Auto' },
+    { pref: 'light', label: 'Light' },
+    { pref: 'dark', label: 'Dark' },
   ];
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#000000' }}>
+    <View style={{ flex: 1, backgroundColor: theme.background }}>
       <ScrollView
-        contentContainerStyle={{ paddingBottom: 40 }}
+        contentContainerStyle={{ paddingBottom: 100 }}
         showsVerticalScrollIndicator={false}
       >
-        {/* ---- Title ---- */}
+        {/* ---- Header ---- */}
         <Animated.View
-          entering={FadeInDown.duration(400)}
-          style={{
-            paddingTop: 60,
-            paddingBottom: 24,
-            alignItems: 'center',
-          }}
+          entering={FadeIn.duration(400)}
+          style={{ paddingTop: 60, paddingBottom: 8, paddingHorizontal: 24 }}
         >
-          <Text
-            style={{
-              color: theme.primary,
-              fontSize: 20,
-              fontWeight: '700',
-              letterSpacing: 0.3,
-            }}
-          >
+          <Text style={{ color: theme.text, fontSize: 28, fontWeight: '800', letterSpacing: -0.3 }}>
             {t('settings.title')}
           </Text>
         </Animated.View>
 
-        <View style={{ paddingHorizontal: 16 }}>
-          {/* ---- Edit Profile ---- */}
-          <SettingRow
-            icon={<ProfileIcon color={theme.primary} />}
-            label={t('settings.editProfile')}
+        {/* ---- Profile Card ---- */}
+        <Animated.View entering={FadeInDown.delay(60).duration(400)} style={{ paddingHorizontal: 16, marginTop: 16 }}>
+          <Pressable
             onPress={() => router.push('/onboarding/profile')}
-            index={0}
-          />
+            style={({ pressed }) => ({
+              backgroundColor: theme.surface,
+              borderRadius: 24,
+              padding: 20,
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 16,
+              borderWidth: colorScheme === 'light' ? 1 : 0,
+              borderColor: theme.border,
+              transform: [{ scale: pressed ? 0.98 : 1 }],
+            })}
+          >
+            <View
+              style={{
+                width: 52,
+                height: 52,
+                borderRadius: 18,
+                overflow: 'hidden',
+                backgroundColor: theme.surfaceElevated,
+                borderWidth: 2,
+                borderColor: theme.primary + '30',
+              }}
+            >
+              {baby?.photoUri ? (
+                <Image source={{ uri: baby.photoUri }} style={{ width: '100%', height: '100%' }} />
+              ) : (
+                <View style={{ transform: [{ scale: 0.6 }], alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%' }}>
+                  <BabyFaceIcon size={80} />
+                </View>
+              )}
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={{ color: theme.text, fontSize: 17, fontWeight: '700' }}>
+                {baby?.name ?? 'Baby'}
+              </Text>
+              <Text style={{ color: theme.textSecondary, fontSize: 13, marginTop: 2, fontWeight: '500' }}>
+                {t('settings.editProfile')}
+              </Text>
+            </View>
+            <ChevronRightIcon color={theme.textTertiary} />
+          </Pressable>
+        </Animated.View>
 
-          {/* ---- Language ---- */}
-          <SettingRow
-            icon={<LanguageIcon color={theme.primary} />}
-            label={t('settings.language')}
-            index={1}
-            rightContent={
-              <View style={{ flexDirection: 'row', gap: 4 }}>
+        {/* ---- Section: Appearance ---- */}
+        <Animated.View entering={FadeInDown.delay(120).duration(400)} style={{ paddingHorizontal: 16, marginTop: 28 }}>
+          <Text style={{ color: theme.textTertiary, fontSize: 11, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 1.2, marginBottom: 10, marginLeft: 8 }}>
+            {t('settings.appearance', 'Apparence')}
+          </Text>
+
+          <View
+            style={{
+              backgroundColor: theme.surface,
+              borderRadius: 22,
+              overflow: 'hidden',
+              borderWidth: colorScheme === 'light' ? 1 : 0,
+              borderColor: theme.border,
+            }}
+          >
+            {/* Dark/Light Mode */}
+            <View style={{ padding: 16, flexDirection: 'row', alignItems: 'center', gap: 14 }}>
+              <View style={{ width: 36, height: 36, borderRadius: 12, backgroundColor: theme.primary + '12', alignItems: 'center', justifyContent: 'center' }}>
+                <AppearanceIcon color={theme.primary} size={18} />
+              </View>
+              <Text style={{ flex: 1, color: theme.text, fontSize: 15, fontWeight: '500' }}>
+                {t('settings.appearance', 'Mode')}
+              </Text>
+              <View style={{ flexDirection: 'row', gap: 3, backgroundColor: theme.surfaceElevated, borderRadius: 10, padding: 3 }}>
+                {appearanceOptions.map((opt) => {
+                  const isActive = colorSchemePreference === opt.pref;
+                  return (
+                    <Pressable
+                      key={opt.pref}
+                      onPress={() => setColorSchemePreference(opt.pref)}
+                      style={{
+                        paddingHorizontal: 10,
+                        paddingVertical: 6,
+                        borderRadius: 8,
+                        backgroundColor: isActive ? theme.primary : 'transparent',
+                      }}
+                    >
+                      <Text
+                        style={{
+                          color: isActive ? activeTextColor : theme.textSecondary,
+                          fontSize: 11,
+                          fontWeight: '600',
+                        }}
+                      >
+                        {opt.label}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
+            </View>
+
+            <View style={{ height: 1, backgroundColor: theme.border, marginLeft: 66 }} />
+
+            {/* Language */}
+            <View style={{ padding: 16, flexDirection: 'row', alignItems: 'center', gap: 14 }}>
+              <View style={{ width: 36, height: 36, borderRadius: 12, backgroundColor: theme.primary + '12', alignItems: 'center', justifyContent: 'center' }}>
+                <LanguageIcon color={theme.primary} size={18} />
+              </View>
+              <Text style={{ flex: 1, color: theme.text, fontSize: 15, fontWeight: '500' }}>
+                {t('settings.language')}
+              </Text>
+              <View style={{ flexDirection: 'row', gap: 3, backgroundColor: theme.surfaceElevated, borderRadius: 10, padding: 3 }}>
                 {(['fr', 'en'] as Language[]).map((lang) => {
                   const isActive = language === lang;
                   return (
@@ -289,16 +340,16 @@ export default function SettingsScreen() {
                       key={lang}
                       onPress={() => setLanguage(lang)}
                       style={{
-                        paddingHorizontal: 14,
-                        paddingVertical: 8,
-                        borderRadius: 10,
-                        backgroundColor: isActive ? theme.primary : '#2C2C2E',
+                        paddingHorizontal: 12,
+                        paddingVertical: 6,
+                        borderRadius: 8,
+                        backgroundColor: isActive ? theme.primary : 'transparent',
                       }}
                     >
                       <Text
                         style={{
-                          color: isActive ? '#000000' : '#8E8E93',
-                          fontSize: 13,
+                          color: isActive ? activeTextColor : theme.textSecondary,
+                          fontSize: 12,
                           fontWeight: '600',
                         }}
                       >
@@ -308,15 +359,18 @@ export default function SettingsScreen() {
                   );
                 })}
               </View>
-            }
-          />
+            </View>
 
-          {/* ---- Theme Color ---- */}
-          <SettingRow
-            icon={<PaletteIcon color={theme.primary} />}
-            label={t('settings.themeColor')}
-            index={2}
-            rightContent={
+            <View style={{ height: 1, backgroundColor: theme.border, marginLeft: 66 }} />
+
+            {/* Theme Color */}
+            <View style={{ padding: 16, flexDirection: 'row', alignItems: 'center', gap: 14 }}>
+              <View style={{ width: 36, height: 36, borderRadius: 12, backgroundColor: theme.primary + '12', alignItems: 'center', justifyContent: 'center' }}>
+                <PaletteIcon color={theme.primary} size={18} />
+              </View>
+              <Text style={{ flex: 1, color: theme.text, fontSize: 15, fontWeight: '500' }}>
+                {t('settings.themeColor')}
+              </Text>
               <View style={{ flexDirection: 'row', gap: 10 }}>
                 {themeOptions.map((opt) => {
                   const isActive = themeColor === opt.color;
@@ -325,22 +379,22 @@ export default function SettingsScreen() {
                       key={opt.color}
                       onPress={() => setThemeColor(opt.color)}
                       style={{
-                        width: 32,
-                        height: 32,
-                        borderRadius: 16,
+                        width: 28,
+                        height: 28,
+                        borderRadius: 14,
                         backgroundColor: opt.hex,
-                        borderWidth: isActive ? 3 : 0,
-                        borderColor: '#FFFFFF',
+                        borderWidth: isActive ? 2.5 : 0,
+                        borderColor: theme.text,
                         alignItems: 'center',
                         justifyContent: 'center',
                       }}
                     >
                       {isActive && (
-                        <Svg width={14} height={14} viewBox="0 0 14 14" fill="none">
+                        <Svg width={12} height={12} viewBox="0 0 14 14" fill="none">
                           <Path
                             d="M3 7l3 3 5-6"
-                            stroke="#FFFFFF"
-                            strokeWidth={2}
+                            stroke={theme.activeButtonText}
+                            strokeWidth={2.5}
                             strokeLinecap="round"
                             strokeLinejoin="round"
                           />
@@ -350,50 +404,110 @@ export default function SettingsScreen() {
                   );
                 })}
               </View>
-            }
-          />
+            </View>
+          </View>
+        </Animated.View>
 
-          {/* ---- Separator ---- */}
-          <View style={{ height: 16 }} />
+        {/* ---- Section: Data ---- */}
+        <Animated.View entering={FadeInDown.delay(200).duration(400)} style={{ paddingHorizontal: 16, marginTop: 28 }}>
+          <Text style={{ color: theme.textTertiary, fontSize: 11, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 1.2, marginBottom: 10, marginLeft: 8 }}>
+            {t('settings.data', 'Donnees')}
+          </Text>
 
-          {/* ---- Export Data ---- */}
-          <SettingRow
-            icon={<ExportIcon color="#8E8E93" />}
-            label={t('settings.exportData')}
-            onPress={handleExport}
-            index={3}
-          />
+          <View
+            style={{
+              backgroundColor: theme.surface,
+              borderRadius: 22,
+              overflow: 'hidden',
+              borderWidth: colorScheme === 'light' ? 1 : 0,
+              borderColor: theme.border,
+            }}
+          >
+            <Pressable
+              onPress={handleExport}
+              style={({ pressed }) => ({
+                padding: 16,
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 14,
+                backgroundColor: pressed ? theme.surfaceLight : 'transparent',
+              })}
+            >
+              <View style={{ width: 36, height: 36, borderRadius: 12, backgroundColor: theme.surfaceElevated, alignItems: 'center', justifyContent: 'center' }}>
+                <ExportIcon color={theme.textSecondary} size={18} />
+              </View>
+              <Text style={{ flex: 1, color: theme.text, fontSize: 15, fontWeight: '500' }}>
+                {t('settings.exportData')}
+              </Text>
+              <ChevronRightIcon color={theme.textTertiary} />
+            </Pressable>
 
-          {/* ---- Import Data ---- */}
-          <SettingRow
-            icon={<ImportIcon color="#8E8E93" />}
-            label={t('settings.importData')}
-            onPress={handleImport}
-            index={4}
-          />
+            <View style={{ height: 1, backgroundColor: theme.border, marginLeft: 66 }} />
 
-          {/* ---- Separator ---- */}
-          <View style={{ height: 16 }} />
+            <Pressable
+              onPress={handleImport}
+              style={({ pressed }) => ({
+                padding: 16,
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 14,
+                backgroundColor: pressed ? theme.surfaceLight : 'transparent',
+              })}
+            >
+              <View style={{ width: 36, height: 36, borderRadius: 12, backgroundColor: theme.surfaceElevated, alignItems: 'center', justifyContent: 'center' }}>
+                <ImportIcon color={theme.textSecondary} size={18} />
+              </View>
+              <Text style={{ flex: 1, color: theme.text, fontSize: 15, fontWeight: '500' }}>
+                {t('settings.importData')}
+              </Text>
+              <ChevronRightIcon color={theme.textTertiary} />
+            </Pressable>
+          </View>
+        </Animated.View>
 
-          {/* ---- Delete All ---- */}
-          <SettingRow
-            icon={<TrashIcon color="#FF3B30" />}
-            label={t('settings.deleteAll')}
-            onPress={handleDeleteAll}
-            destructive
-            index={5}
-          />
+        {/* ---- Section: Danger ---- */}
+        <Animated.View entering={FadeInDown.delay(280).duration(400)} style={{ paddingHorizontal: 16, marginTop: 28 }}>
+          <View
+            style={{
+              backgroundColor: theme.surface,
+              borderRadius: 22,
+              overflow: 'hidden',
+              borderWidth: colorScheme === 'light' ? 1 : 0,
+              borderColor: theme.border,
+            }}
+          >
+            <Pressable
+              onPress={handleDeleteAll}
+              style={({ pressed }) => ({
+                padding: 16,
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 14,
+                backgroundColor: pressed ? '#FF3B3008' : 'transparent',
+              })}
+            >
+              <View style={{ width: 36, height: 36, borderRadius: 12, backgroundColor: '#FF3B3015', alignItems: 'center', justifyContent: 'center' }}>
+                <TrashIcon color="#FF3B30" size={18} />
+              </View>
+              <Text style={{ flex: 1, color: '#FF3B30', fontSize: 15, fontWeight: '500' }}>
+                {t('settings.deleteAll')}
+              </Text>
+            </Pressable>
+          </View>
+        </Animated.View>
 
-          {/* ---- Separator ---- */}
-          <View style={{ height: 16 }} />
-
-          {/* ---- Version ---- */}
-          <SettingRow
-            icon={<InfoIcon color="#636366" />}
-            label={`${t('settings.version')} ${appVersion}`}
-            index={6}
-          />
-        </View>
+        {/* ---- Footer ---- */}
+        <Animated.View entering={FadeInDown.delay(340).duration(400)} style={{ alignItems: 'center', marginTop: 32, paddingHorizontal: 24 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+            <InfoIcon color={theme.textTertiary} size={14} />
+            <Text style={{ color: theme.textTertiary, fontSize: 12, fontWeight: '500' }}>
+              Baby Note {appVersion}
+            </Text>
+          </View>
+          <Text style={{ color: theme.textTertiary, fontSize: 11, opacity: 0.6 }}>
+            Made with {'\u2764\uFE0F'} for parents
+          </Text>
+        </Animated.View>
       </ScrollView>
     </View>
   );

@@ -1,143 +1,101 @@
 import React from 'react';
-import { View, Text, Pressable, Dimensions } from 'react-native';
+import { View, Text, Pressable } from 'react-native';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import Svg, { Circle, Rect, Path, Line, Ellipse, G } from 'react-native-svg';
-import Animated, { FadeIn } from 'react-native-reanimated';
+import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppContext } from '@/lib/context';
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
-
-// --- SVG Icon Components ---
-
-function CribIcon({ size = 44, color = '#636366' }: { size?: number; color?: string }) {
+// Phone with baby icons floating out of it
+function PhoneIllustration({ color }: { color: string }) {
   return (
-    <Svg width={size} height={size} viewBox="0 0 44 44" fill="none">
-      {/* Mattress base */}
-      <Rect x="6" y="22" width="32" height="8" rx="3" stroke={color} strokeWidth="2" fill="none" />
-      {/* Headboard */}
-      <Path d="M8 22V12C8 10 10 8 14 8H30C34 8 36 10 36 12V22" stroke={color} strokeWidth="2" strokeLinecap="round" fill="none" />
-      {/* Rails */}
-      <Line x1="14" y1="10" x2="14" y2="22" stroke={color} strokeWidth="1.5" strokeLinecap="round" />
-      <Line x1="22" y1="10" x2="22" y2="22" stroke={color} strokeWidth="1.5" strokeLinecap="round" />
-      <Line x1="30" y1="10" x2="30" y2="22" stroke={color} strokeWidth="1.5" strokeLinecap="round" />
-      {/* Legs */}
-      <Line x1="10" y1="30" x2="10" y2="36" stroke={color} strokeWidth="2" strokeLinecap="round" />
-      <Line x1="34" y1="30" x2="34" y2="36" stroke={color} strokeWidth="2" strokeLinecap="round" />
+    <Svg width={260} height={300} viewBox="0 0 260 300" fill="none">
+      {/* === Phone === */}
+      <Rect x={85} y={130} width={90} height={160} rx={14} stroke={color} strokeWidth={2.2} />
+      <Rect x={92} y={140} width={76} height={130} rx={4} stroke={color} strokeWidth={1} opacity={0.4} />
+      <Line x1={120} y1={280} x2={140} y2={280} stroke={color} strokeWidth={2} strokeLinecap="round" />
+
+      {/* === Shine lines on top-right of phone === */}
+      <Line x1={185} y1={148} x2={200} y2={135} stroke={color} strokeWidth={2} strokeLinecap="round" />
+      <Line x1={188} y1={162} x2={205} y2={155} stroke={color} strokeWidth={1.8} strokeLinecap="round" />
+      <Line x1={190} y1={178} x2={202} y2={175} stroke={color} strokeWidth={1.5} strokeLinecap="round" />
+
+      {/* === Floating icons === */}
+
+      {/* Heart - top left */}
+      <G transform="translate(55, 75)">
+        <Circle r={26} stroke={color} strokeWidth={1.5} />
+        <Path
+          d="M0 8 C-2 6 -10 1 -10 -3 C-10 -6.5 -7.5 -8.5 -5 -8.5 C-2.5 -8.5 -1 -6.5 0 -5 C1 -6.5 2.5 -8.5 5 -8.5 C7.5 -8.5 10 -6.5 10 -3 C10 1 2 6 0 8Z"
+          stroke={color}
+          strokeWidth={1.4}
+          fill="none"
+          strokeLinejoin="round"
+        />
+      </G>
+
+      {/* Footprint - top center-left */}
+      <G transform="translate(118, 45)">
+        <Circle r={22} stroke={color} strokeWidth={1.5} />
+        <Ellipse cx={0} cy={3} rx={6} ry={9} stroke={color} strokeWidth={1.2} />
+        <Circle cx={-5.5} cy={-7.5} r={2} stroke={color} strokeWidth={1} />
+        <Circle cx={-1} cy={-10} r={2.2} stroke={color} strokeWidth={1} />
+        <Circle cx={4} cy={-9} r={1.9} stroke={color} strokeWidth={1} />
+        <Circle cx={7.5} cy={-5.5} r={1.6} stroke={color} strokeWidth={1} />
+      </G>
+
+      {/* Star - top right */}
+      <G transform="translate(195, 50)">
+        <Circle r={24} stroke={color} strokeWidth={1.5} />
+        <Path
+          d="M0 -10 L2.5 -3.5 L9.5 -3.5 L4 1 L6 8 L0 4 L-6 8 L-4 1 L-9.5 -3.5 L-2.5 -3.5Z"
+          stroke={color}
+          strokeWidth={1.3}
+          fill="none"
+          strokeLinejoin="round"
+        />
+      </G>
+
+      {/* Pacifier - left */}
+      <G transform="translate(40, 168)">
+        <Circle r={24} stroke={color} strokeWidth={1.5} />
+        <Circle cx={-3} cy={-5} r={4.5} stroke={color} strokeWidth={1.2} />
+        <Ellipse cx={2} cy={2} rx={10} ry={7.5} stroke={color} strokeWidth={1.2} />
+        <Path d="M6 9 Q8 15 2 13" stroke={color} strokeWidth={1.2} fill="none" strokeLinecap="round" />
+      </G>
+
+      {/* Bottle - right */}
+      <G transform="translate(220, 110)">
+        <Circle r={26} stroke={color} strokeWidth={1.5} />
+        <Path d="M-3 -12 C-3 -14 -1 -16 0 -16 C1 -16 3 -14 3 -12V-8H-3V-12Z" stroke={color} strokeWidth={1.2} fill="none" />
+        <Rect x={-5} y={-8} width={10} height={2.5} rx={1} stroke={color} strokeWidth={1.2} />
+        <Path d="M-5 -5.5H5V8C5 10 3.5 12 1 12H-1C-3.5 12 -5 10 -5 8V-5.5Z" stroke={color} strokeWidth={1.3} fill="none" />
+        <Line x1={-3} y1={0} x2={0} y2={0} stroke={color} strokeWidth={1} strokeLinecap="round" />
+        <Line x1={-3} y1={3.5} x2={0} y2={3.5} stroke={color} strokeWidth={1} strokeLinecap="round" />
+        <Line x1={-3} y1={7} x2={0} y2={7} stroke={color} strokeWidth={1} strokeLinecap="round" />
+      </G>
+
+      {/* Thumbs up - bottom left */}
+      <G transform="translate(52, 250)">
+        <Circle r={22} stroke={color} strokeWidth={1.5} />
+        <Path
+          d="M-2 -2 L-2 -8 C-2 -10 0 -12 2 -10 L4 -8 L8 -8 C9.5 -8 10 -6.5 10 -5 V2 C10 3.5 9 4.5 7.5 4.5 H0 C-2 4.5 -2 3 -2 2Z"
+          stroke={color}
+          strokeWidth={1.2}
+          fill="none"
+          strokeLinejoin="round"
+        />
+        <Rect x={-9} y={-4} width={5.5} height={9} rx={1.5} stroke={color} strokeWidth={1.2} />
+      </G>
+
+      {/* Small decorative dots */}
+      <Circle cx={160} cy={25} r={2.5} fill={color} opacity={0.5} />
+      <Circle cx={82} cy={120} r={2} fill={color} opacity={0.4} />
+      <Circle cx={235} cy={85} r={3} fill={color} opacity={0.4} />
     </Svg>
   );
 }
-
-function BottleIcon({ size = 40, color = '#636366' }: { size?: number; color?: string }) {
-  return (
-    <Svg width={size} height={size} viewBox="0 0 40 40" fill="none">
-      {/* Nipple */}
-      <Path d="M17 6C17 4 19 2 20 2C21 2 23 4 23 6V10H17V6Z" stroke={color} strokeWidth="1.8" fill="none" />
-      {/* Cap ring */}
-      <Rect x="15" y="10" width="10" height="3" rx="1" stroke={color} strokeWidth="1.8" fill="none" />
-      {/* Body */}
-      <Path d="M15 13H25V32C25 34.2 23.2 36 21 36H19C16.8 36 15 34.2 15 32V13Z" stroke={color} strokeWidth="2" fill="none" />
-      {/* Measurement lines */}
-      <Line x1="17" y1="20" x2="20" y2="20" stroke={color} strokeWidth="1.2" strokeLinecap="round" />
-      <Line x1="17" y1="25" x2="20" y2="25" stroke={color} strokeWidth="1.2" strokeLinecap="round" />
-      <Line x1="17" y1="30" x2="20" y2="30" stroke={color} strokeWidth="1.2" strokeLinecap="round" />
-    </Svg>
-  );
-}
-
-function DiaperIcon({ size = 42, color = '#636366' }: { size?: number; color?: string }) {
-  return (
-    <Svg width={size} height={size} viewBox="0 0 42 42" fill="none">
-      {/* Main diaper shape */}
-      <Path
-        d="M8 14C8 12 10 10 14 10H28C32 10 34 12 34 14V22C34 28 28 32 21 32C14 32 8 28 8 22V14Z"
-        stroke={color}
-        strokeWidth="2"
-        fill="none"
-      />
-      {/* Waistband */}
-      <Path d="M10 14H32" stroke={color} strokeWidth="1.5" strokeLinecap="round" />
-      {/* Tape tabs */}
-      <Path d="M8 16L5 14L8 12" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-      <Path d="M34 16L37 14L34 12" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-      {/* Heart decoration */}
-      <Path d="M19 20C19 18.5 20 18 21 19C22 18 23 18.5 23 20C23 21.5 21 23 21 23C21 23 19 21.5 19 20Z" stroke={color} strokeWidth="1.2" fill="none" />
-    </Svg>
-  );
-}
-
-function StrollerIcon({ size = 44, color = '#636366' }: { size?: number; color?: string }) {
-  return (
-    <Svg width={size} height={size} viewBox="0 0 44 44" fill="none">
-      {/* Handle */}
-      <Path d="M32 8C32 8 34 8 34 10V18" stroke={color} strokeWidth="2" strokeLinecap="round" fill="none" />
-      {/* Carriage body */}
-      <Path d="M10 18H34V28C34 30 32 32 30 32H14C12 32 10 30 10 28V18Z" stroke={color} strokeWidth="2" fill="none" />
-      {/* Hood */}
-      <Path d="M10 18C10 12 16 8 22 8" stroke={color} strokeWidth="2" strokeLinecap="round" fill="none" />
-      {/* Wheels */}
-      <Circle cx="14" cy="36" r="3" stroke={color} strokeWidth="2" fill="none" />
-      <Circle cx="30" cy="36" r="3" stroke={color} strokeWidth="2" fill="none" />
-      {/* Axle */}
-      <Line x1="14" y1="32" x2="14" y2="33" stroke={color} strokeWidth="1.5" strokeLinecap="round" />
-      <Line x1="30" y1="32" x2="30" y2="33" stroke={color} strokeWidth="1.5" strokeLinecap="round" />
-    </Svg>
-  );
-}
-
-function RattleIcon({ size = 40, color = '#636366' }: { size?: number; color?: string }) {
-  return (
-    <Svg width={size} height={size} viewBox="0 0 40 40" fill="none">
-      {/* Top circle */}
-      <Circle cx="20" cy="13" r="9" stroke={color} strokeWidth="2" fill="none" />
-      {/* Decoration dots */}
-      <Circle cx="17" cy="11" r="1.5" fill={color} />
-      <Circle cx="23" cy="11" r="1.5" fill={color} />
-      <Circle cx="20" cy="15" r="1.5" fill={color} />
-      {/* Handle */}
-      <Path d="M18 22H22V34C22 35.1 21.1 36 20 36C18.9 36 18 35.1 18 34V22Z" stroke={color} strokeWidth="2" fill="none" />
-      {/* Handle ring */}
-      <Rect x="16" y="21" width="8" height="3" rx="1.5" stroke={color} strokeWidth="1.5" fill="none" />
-    </Svg>
-  );
-}
-
-function BabyFaceIcon({ size = 96 }: { size?: number }) {
-  const faceColor = '#F4A683';
-  const featureColor = '#000000';
-  return (
-    <Svg width={size} height={size} viewBox="0 0 96 96" fill="none">
-      {/* Face circle */}
-      <Circle cx="48" cy="48" r="42" fill={faceColor} />
-      {/* Cheeks */}
-      <Circle cx="30" cy="54" r="6" fill="#F7BFA3" opacity={0.6} />
-      <Circle cx="66" cy="54" r="6" fill="#F7BFA3" opacity={0.6} />
-      {/* Left eye */}
-      <Circle cx="36" cy="42" r="3.5" fill={featureColor} />
-      <Circle cx="37.5" cy="40.5" r="1.2" fill="#FFFFFF" />
-      {/* Right eye */}
-      <Circle cx="60" cy="42" r="3.5" fill={featureColor} />
-      <Circle cx="61.5" cy="40.5" r="1.2" fill="#FFFFFF" />
-      {/* Smile */}
-      <Path d="M38 56C40 62 56 62 58 56" stroke={featureColor} strokeWidth="2.5" strokeLinecap="round" fill="none" />
-      {/* Hair tuft */}
-      <Path d="M42 8C44 14 48 10 50 6C52 12 56 10 54 8" stroke={faceColor} strokeWidth="3" strokeLinecap="round" fill="none" />
-    </Svg>
-  );
-}
-
-// Icon positions arranged in a circle around center
-const ICON_POSITIONS = [
-  { x: -90, y: -100, rotate: -15 },   // top-left
-  { x: 70, y: -110, rotate: 10 },     // top-right
-  { x: -110, y: 20, rotate: -8 },     // middle-left
-  { x: 100, y: 10, rotate: 12 },      // middle-right
-  { x: -70, y: 110, rotate: -5 },     // bottom-left
-  { x: 80, y: 100, rotate: 8 },       // bottom-right
-];
-
-const ICONS = [CribIcon, BottleIcon, DiaperIcon, StrollerIcon, RattleIcon];
 
 export default function WelcomeScreen() {
   const { t } = useTranslation();
@@ -145,74 +103,35 @@ export default function WelcomeScreen() {
   const { theme } = React.use(AppContext);
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#000' }}>
-      {/* Icons and baby face area */}
+    <View style={{ flex: 1, backgroundColor: theme.background }}>
+      {/* Illustration */}
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <View style={{ width: 280, height: 300, justifyContent: 'center', alignItems: 'center' }}>
-          {/* Scattered baby icons */}
-          {ICONS.map((IconComponent, index) => {
-            const pos = ICON_POSITIONS[index];
-            return (
-              <Animated.View
-                key={index}
-                entering={FadeIn.delay(300 + index * 150).duration(600)}
-                style={{
-                  position: 'absolute',
-                  left: '50%',
-                  top: '50%',
-                  marginLeft: pos.x - 22,
-                  marginTop: pos.y - 22,
-                  transform: [{ rotate: `${pos.rotate}deg` }],
-                  opacity: 0.7,
-                }}
-              >
-                <IconComponent />
-              </Animated.View>
-            );
-          })}
-
-          {/* Center baby face */}
-          <Animated.View entering={FadeIn.delay(100).duration(800)}>
-            <BabyFaceIcon size={96} />
-          </Animated.View>
-        </View>
+        <Animated.View entering={FadeIn.delay(100).duration(800)}>
+          <PhoneIllustration color={theme.textTertiary} />
+        </Animated.View>
       </View>
 
       {/* Bottom content */}
       <Animated.View
-        entering={FadeIn.delay(600).duration(700)}
+        entering={FadeInDown.delay(500).duration(600)}
         style={{
           paddingHorizontal: 32,
           paddingBottom: insets.bottom + 16,
         }}
       >
-        {/* Title */}
         <Text
           style={{
-            fontSize: 34,
+            fontSize: 26,
             fontWeight: '700',
-            color: '#FFFFFF',
+            color: theme.text,
             textAlign: 'center',
-            marginBottom: 12,
+            marginBottom: 40,
+            lineHeight: 34,
           }}
         >
           {t('welcome.title')}
         </Text>
 
-        {/* Subtitle */}
-        <Text
-          style={{
-            fontSize: 16,
-            lineHeight: 22,
-            color: '#8E8E93',
-            textAlign: 'center',
-            marginBottom: 32,
-          }}
-        >
-          {t('welcome.subtitle')}
-        </Text>
-
-        {/* Continue button */}
         <Pressable
           onPress={() => router.push('/onboarding/profile')}
           style={({ pressed }) => ({
@@ -221,33 +140,36 @@ export default function WelcomeScreen() {
             height: 56,
             justifyContent: 'center',
             alignItems: 'center',
-            marginBottom: 20,
+            marginBottom: 12,
+            shadowColor: theme.primary,
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.25,
+            shadowRadius: 12,
+            elevation: 6,
           })}
         >
-          <Text style={{ fontSize: 17, fontWeight: '600', color: '#000000' }}>
-            {t('welcome.continue')}
+          <Text style={{ fontSize: 17, fontWeight: '600', color: theme.activeButtonText }}>
+            {t('welcome.newHere')}
           </Text>
         </Pressable>
 
-        {/* Terms text */}
-        <Text
-          style={{
-            fontSize: 12,
-            lineHeight: 16,
-            color: '#636366',
-            textAlign: 'center',
-            marginBottom: 8,
-          }}
+        <Pressable
+          onPress={() => router.push('/onboarding/searching')}
+          style={({ pressed }) => ({
+            backgroundColor: pressed ? theme.surfaceLight : theme.surface,
+            borderRadius: 30,
+            height: 56,
+            justifyContent: 'center',
+            alignItems: 'center',
+            marginBottom: 12,
+            borderWidth: 1,
+            borderColor: theme.border,
+          })}
         >
-          {t('welcome.terms')}{' '}
-          <Text style={{ color: '#8E8E93', textDecorationLine: 'underline' }}>
-            {t('welcome.termsLink')}
-          </Text>{' '}
-          {t('welcome.and')}{' '}
-          <Text style={{ color: '#8E8E93', textDecorationLine: 'underline' }}>
-            {t('welcome.privacyLink')}
+          <Text style={{ fontSize: 17, fontWeight: '600', color: theme.text }}>
+            {t('welcome.alreadyUsed')}
           </Text>
-        </Text>
+        </Pressable>
       </Animated.View>
     </View>
   );

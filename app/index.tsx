@@ -4,7 +4,7 @@ import { router } from 'expo-router';
 import { AppContext } from '@/lib/context';
 
 export default function Index() {
-  const { isLoading, onboardingDone } = React.use(AppContext);
+  const { isLoading, onboardingDone, theme } = React.use(AppContext);
 
   useEffect(() => {
     if (!isLoading) {
@@ -17,8 +17,8 @@ export default function Index() {
   }, [isLoading, onboardingDone]);
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#000', justifyContent: 'center', alignItems: 'center' }}>
-      <ActivityIndicator size="large" color="#F4A683" />
+    <View style={{ flex: 1, backgroundColor: theme.background, justifyContent: 'center', alignItems: 'center' }}>
+      <ActivityIndicator size="large" color={theme.primary} />
     </View>
   );
 }
